@@ -1,4 +1,4 @@
 django==1.4
-Unipath:w
+Unipath
 psycopg2
 

@@ -14,7 +14,7 @@ PROJECT_DIR = Path(__file__).parent
 
 
 import dj_database_url
-DATABASES = {'default': dj_database_url.config(default='postgres://eventex:eventex@localhost/eventex')}
+DATABASES = {'default': dj_database_url.config(default='sqlite:///'+PROJECT_DIR+'/eventexdb')}
 
 '''
 DATABASES = {

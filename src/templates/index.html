@@ -1,14 +1,15 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-        "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-    <title>EventeX</title>
-    <link type="text/css" href="{{ STATIC_URL }}css/style.css" rel="stylesheet" media="screen" />
-</head>
-<body>
-    <img src="{{ STATIC_URL }}img/logo.png" />
-    <h1>Bem-Vindo ao EventeX!</h1>
-    <p> O evento mais sensacional do anos depois do Dev in Rio</p>
-1
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Bem Vindo ao EventeX!</h1>
+    <p>O evento mais sensacional do ano depois do Dev in Rio!</p>
+    <p>Você nao pode perder esta oportunidade!</p>
+    <p><strong>
+        <a href="{% url subscriptions:subscribe %}"> Inscreva-se Já!</a>
+    </strong></p>
+    <p>Para dúvidas e mais informações ente em contato com
+        <a href="mailto:eventex@eventex.com.br">eventex@eventex.com.br</a>
+    </p>
+{% endblock content %}
+
+

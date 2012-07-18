@@ -1,10 +1,13 @@
 # coding: utf-8
+from django.contrib.auth.models import User
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test.testcases import TestCase
+from mock import Mock
 from .models import Subscription
 from django.db import IntegrityError
 from .forms import SubscriptionForm
+from .admin import SubscriptionAdmin, Subscription, admin
 
 '''
 Testa a Rota
@@ -149,3 +152,48 @@ class SuccessViewNotFound(TestCase):
         "Acesso a inscrição não cadastrada deve retornar 404."
         response = self.client.get(reverse('subscriptions:success', args=[0]))
         self.assertEqual(404, response.status_code)
+
+
+'''
+Testa as actions criadas no admin
+'''
+class CustomActionTest(TestCase):
+    def setUp(self):
+        Subscription.objects.create(name='Joe Doe', cpf='12345678900', email='joe@doe.com', phone='12345678')
+        self.modeladmin = SubscriptionAdmin(Subscription, admin.site)
+
+    def test_update(self):
+        'Dados devem estar atualizados como pagos'
+        self.modeladmin.mark_as_paid(Mock(), Subscription.objects.all())
+        self.assertEqual(1, Subscription.objects.filter(paid=True).count())
+
+'''
+Testa a exportacao dos subscriptions
+'''
+class ExportSubscriptionViewTest(TestCase):
+    def setUp(self):
+        User.objects.create_superuser('admin', 'admin@admin.com', 'admin')
+        assert self.client.login(username='admin', password='admin')
+        self.resp = self.client.get(reverse('admin:export_subscriptions'))
+
+    def test_get(self):
+        u'Sucesso ao acessar a url de download do arquivo csv.'
+        self.assertEqual(200, self.resp.status_code)
+
+    def test_content_type(self):
+        u'Content type deve ser text/csv'
+        self.assertEqual('text/csv', self.resp['Content-Type'])
+
+    def test_attachment(self):
+        u'Header indicado ao browser que a resposta é um arquivo a ser salvo'
+        self.assertTrue('attachment;' in self.resp['Content-Disposition'])
+
+'''
+Testa o se esta bloqueando usuario nao logado
+'''
+class ExportSubscriptionsNotFound(TestCase):
+    def test_404(self):
+        u'Login é exigido para download do csv'
+        #Quando o usario nao esta logado o Admin reponde 200 e mostar a tela de login
+        response = self.client.get(reverse('admin:export_subscriptions'))
+        self.assertTemplateUsed(response, 'admin/login.html')

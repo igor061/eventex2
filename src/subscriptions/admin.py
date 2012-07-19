@@ -3,7 +3,7 @@ from django.conf.urls import patterns, url
 from django.contrib import admin
 from django.http import HttpResponse
 from django.utils.datetime_safe import datetime
-from django.utils.translation import ungettext
+from django.utils.translation import ungettext, ugettext as _
 from .models import Subscription
 
 
@@ -23,12 +23,12 @@ class SubscriptionAdmin(admin.ModelAdmin):
             count
         ) % {'count': count}
         self.message_user(request, msg)
-    mark_as_paid.short_description = u'Marcar como pagas'
+    mark_as_paid.short_description = _(u'Marcar como pagas')
 
 
     def subscribed_today(self, obj):
         return obj.created_at.date() == datetime.today().date()
-    subscribed_today.short_description = u'Inscrito hoje?'
+    subscribed_today.short_description = _(u'Inscrito hoje?')
     subscribed_today.boolean = True
 
     def get_urls(self):

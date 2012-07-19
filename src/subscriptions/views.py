@@ -22,7 +22,6 @@ def subscribeDoPost(request):
     if not form.is_valid():
         return openSubscription(request, form)
 
-
     subscription = form.save()
     send_mail(subject=u'Cadastro com Sucesso no EventeX',
               message=u'Obrigado pela sua inscrição!',

@@ -15,6 +15,13 @@ def speaker_detail(request, slug):
     speaker = get_object_or_404(Speaker, slug=slug)
     return direct_to_template(request, 'core/speaker_detail.html', {'speaker': speaker})
 
+def talk_detail(request, pk):
+    talk = get_object_or_404(Talk, pk=pk)
+
+
+    return direct_to_template(request, 'core/talk_detail.html', {'talk': talk})
+
+
 def talks_agenda(request):
 
     context = {
@@ -23,3 +30,4 @@ def talks_agenda(request):
     }
 
     return direct_to_template(request, 'core/talks.html', context)
+

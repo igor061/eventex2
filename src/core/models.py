@@ -84,10 +84,51 @@ class Talk(models.Model):
     title = models.CharField(_(u'Título'), max_length=50, unique=True)
     description = models.TextField(_(u'Descrição'), blank=True)
     start_time = models.TimeField(blank=True)
+    speakers = models.ManyToManyField('Speaker', verbose_name=_('palestrante'))
 
+    @property
+    def slides(self):
+        return self.media_set.filter(type="SL")
+
+    @property
+    def videos(self):
+        return self.media_set.filter(type="YT")
 
     objects = PeriodManager()
 
     def __unicode__(self):
         return self.title
+
+
+###############################
+##                 Course
+###############################
+
+# Model
+
+class Course(Talk):
+    slots = models.IntegerField()
+    notes = models.TextField()
+
+    objects = PeriodManager()
+
+
+################################
+##             Media
+################################
+
+# Model
+class Media(models.Model):
+    MEDIAS = (
+        ('SL', 'SlideShare'),
+        ('YT', 'Youtube'),
+    )
+
+    talk = models.ForeignKey('Talk')
+    type = models.CharField(max_length=2, choices=MEDIAS)
+    title = models.CharField(_(u'Título'), max_length=255)
+    media_id = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return u'%s - %s' % (self.talk.title, self.title)
 

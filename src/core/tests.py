@@ -2,7 +2,7 @@
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from .models import Speaker, Contact, Talk
-from src.core.models import PeriodManager
+from src.core.models import PeriodManager, Media
 
 class HomepageTest(TestCase):
     def test_get_homepage(self):
@@ -130,3 +130,29 @@ class TalkPeriodManagerTest(TestCase):
             Talk.objects.at_afternoon(), [u'Afternoon Talk'],
             lambda t: t.title
         )
+
+class TalkDetailTest(TestCase):
+    def setUp(self):
+        Talk.objects.create(title="Talk", start_time='10:00')
+        self.resp = self.client.get(reverse('core:talk_detail', args=[1,]))
+
+    def test_get(self):
+        self.assertEqual(200, self.resp.status_code)
+
+    def test_template(self):
+        self.assertTemplateUsed(self.resp, 'core/talk_detail.html')
+
+    def test_talk_in_context(self):
+        talk = self.resp.context['talk']
+        self.assertIsInstance(talk, Talk)
+
+class MediaModelTest(TestCase):
+    def setUp(self):
+        talk = Talk.objects.create(title=u'Talk 1', start_time = '10:00')
+        self.media = Media.objects.create(talk=talk, type='YT', media_id='Qjdfasdf', title="Video")
+
+    def test_create(self):
+        self.assertEqual(1, self.media.pk)
+
+    def test_unicode(self):
+        self.assertEqual("Talk 1 - Video", unicode(self.media))

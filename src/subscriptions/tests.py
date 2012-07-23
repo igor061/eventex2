@@ -8,6 +8,7 @@ from .models import Subscription
 from django.db import IntegrityError
 from .forms import SubscriptionForm
 from .admin import SubscriptionAdmin, Subscription, admin
+from django.utils.translation import ungettext, ugettext as _
 
 '''
 Testa a Rota
@@ -44,9 +45,11 @@ class SubscriptionViewTest(TestCase):
     def test_html(self):
         "O html deve conter os campos do formulário"
         self.assertContains(self.resp, '<form')
-        self.assertContains(self.resp, '<input', 6)
-        self.assertContains(self.resp, 'type="text"', 4)
+        self.assertContains(self.resp, '<input', 7)
+        self.assertContains(self.resp, 'type="text"', 5)
         self.assertContains(self.resp, 'type="submit"')
+
+
 
 '''
 Testa o Modelo
@@ -66,12 +69,6 @@ class SubscriptionModelTest(TestCase):
 
         self.assertRaises(IntegrityError, s.save)
 
-    def test_email_unique(self):
-        "O Email deve ser único"
-        s = Subscription(name = 'Joe Do3e', cpf = '12345678901', email = 'joe@doe.com',
-            phone = '79-9999-9999'
-        )
-        self.assertRaises(IntegrityError, s.save)
 
 
 '''
@@ -197,3 +194,36 @@ class ExportSubscriptionsNotFound(TestCase):
         #Quando o usario nao esta logado o Admin reponde 200 e mostar a tela de login
         response = self.client.get(reverse('admin:export_subscriptions'))
         self.assertTemplateUsed(response, 'admin/login.html')
+
+
+'''
+Testa o preenchimento do Form
+'''
+class SubscriptionFormTest(TestCase):
+    def make_and_validate_form(self, **kwargs):
+        data = dict(name='Joe Doe', cpf='00000000000', email='joe@mail.com', phone='61-99580000')
+        data.update(kwargs)
+        form = SubscriptionForm(data)
+        form.is_valid()
+        return form
+
+    def test_must_alow_email_or_phone(self):
+        u'Tem que informar um email ou telefone'
+        form = self.make_and_validate_form(email='', phone='')
+        self.assertDictEqual(form.errors, {'__all__': [_(u'Informe seu e-mail ou telefone.')]})
+
+    def test_cpf_has_only_digit(self):
+        u'CPF deve ter apenas digitos.'
+        form = self.make_and_validate_form(cpf='A0000000000')
+        self.assertDictEqual(form.errors, {'cpf': [_(u'O CPF deve conter apenas números')]})
+
+    def test_cpf_has_11_digist_max(self):
+        u'CPF deve ter 11 digitos, nao mais.'
+        form = self.make_and_validate_form(cpf='123456789012')
+        self.assertDictEqual(form.errors, {'cpf': [_(u'O CPF deve ter 11 dígitos')]})
+
+    def test_cpf_has_11_digist_min(self):
+        u'CPF deve ter 11 digitos, nao menos'
+        form = self.make_and_validate_form(cpf='1234567890')
+        self.assertDictEqual(form.errors, {'cpf': [_(u'O CPF deve ter 11 dígitos')]})
+
